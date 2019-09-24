@@ -14,8 +14,8 @@
         </el-option>
       </el-select>
       <p>时间范围</p>
-      <p>起始时间 {{ StartTime }}</p>
-      <p>结束时间 {{ EndTime }}</p>
+      <p>起始时间 {{ `${StartTime.getFullYear()}年${month =(StartTime.getMonth() + 1).toString()}月${(StartTime.getDate()).toString()}日` }}</p>
+      <p>结束时间 {{ `${EndTime.getFullYear()}年${month =(EndTime.getMonth() + 1).toString()}月${(EndTime.getDate()).toString()}日` }}</p>
       <el-date-picker
         v-model="selectedStart"
         type="datetime"
@@ -26,14 +26,31 @@
         type="datetime"
         placeholder="选择结束时间">
       </el-date-picker>
-      <el-button round v-on:click="getUserInfor">显示</el-button>
+      <el-button round v-on:click="getUserInfor">显示所选轨迹</el-button>
     </div>
     <div class="main">
-      <baidu-map class="map" :center="{lng: 116.404, lat: 39.915}" :zoom="15">
-        <bm-marker v-for="(item, index) in points"
-        :key ="`points-${index}`"
-        :position="item">
-        </bm-marker>
+      <baidu-map class="map" :center="{lng: 116.404, lat: 39.915}" :zoom="10">
+        <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+        <div v-for="(user, userIndex) in userList"
+        :key="`user-${userIndex}`">
+          <bm-marker v-for="(point, pointIndex) in user[1]"
+          :key ="`point-${pointIndex}`"
+          :position="point"
+          :icon="{
+            url: require(`@/assets/坐标 (${userIndex}).png`), 
+            size: {width: 50, height: 50},
+            opts: {
+              imageSize: {width: 50, height: 50}
+            }
+          }">
+          </bm-marker>
+          <bm-polyline
+          :path="user[1]" stroke-color="blue" 
+          :stroke-opacity="0.5" 
+          :stroke-weight="2" 
+          :editing="false" >
+          </bm-polyline>
+        </div>
       </baidu-map>
     </div>
   </div>
@@ -51,16 +68,8 @@ export default {
       EndTime: new Date("2019-09-24 00:00:00"),
       selectedStart: null,
       selectedEnd: null,
-      points: [
-        {
-          lng: 116.404,
-          lat: 39.915
-        },
-        {
-          lng: 116.405,
-          lat: 39.918
-        }
-      ],
+      userList: allData,
+      polylinePath: [],
       options: [
         {
           userId: '00001',
@@ -90,6 +99,10 @@ export default {
           this.EndTime = new Date(max)
         }
       }
+    },
+    value: function () {
+      /* eslint-disable */
+      console.log(this.value)
     }
   },
   methods: {

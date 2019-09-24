@@ -1,5 +1,5 @@
 import Mock from 'mockjs'
-// import userInfor from './data'
+import userInfor from '@/data'
 
 function getUrlQuery (url) {
   var query = url.split('?')[1]
@@ -15,6 +15,7 @@ export default {
   // Get demo
   getUserInfor: config => {
     /* eslint-disable */
+    console.log(userInfor)
     var variable = getUrlQuery(config.url)
     console.log(variable)
     return {
