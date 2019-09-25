@@ -15,7 +15,6 @@ export default {
   // Get demo
   getUserInfor: config => {
     /* eslint-disable */
-    console.log(userInfor)
     var variable = getUrlQuery(config.url)
     console.log("variable",variable)
     var res=[]
