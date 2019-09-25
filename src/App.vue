@@ -75,7 +75,7 @@ export default {
       selectedStart: new Date("2000-01-01 00:00:00"),
       selectedEnd: new Date("2019-09-24 00:00:00"),
       timeRange: [new Date("2000-01-01 00:00:00").getTime(), new Date("2019-09-24 00:00:00").getTime()],
-      userList: [],
+      userList: allData,
       polylinePath: [],
       options: [
         {
@@ -118,14 +118,14 @@ export default {
   methods: {
     getUserInfor: function () {
       var strIds = this.selectedUserId.toString()
-      this.selectedStart = this.timestampToTime(this.timeRange[0])
-      this.selectedEnd = this.timestampToTime(this.timeRange[1])
+      this.selectedStart = new Date(this.timestampToTime(this.timeRange[0]))
+      this.selectedEnd = new Date(this.timestampToTime(this.timeRange[1]))
       /* eslint-disable */
       console.log('start', this.selectedStart, this.selectedEnd)
       userApi.getUserInfor(strIds, this.selectedStart, this.selectedEnd)
         .then(response => {
-          this.userList = response.data.data
-          console.log('userList', this.userList)
+          // this.userList = response.data.data
+          // console.log('userList', this.userList)
         })
         .catch(error => {
           console.error(error.message)
