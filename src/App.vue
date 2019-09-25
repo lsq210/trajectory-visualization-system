@@ -4,8 +4,9 @@
       轨迹库可视化系统
     </div>
     <div class="aside">
-      欢迎使用！
-      <el-select v-model="selectedUserId" multiple placeholder="请选择用户 ID">
+      <div class="title">欢迎使用😀</div>
+      <p>第一步：请选择用户 ID</p>
+      <el-select v-model="selectedUserId" multiple placeholder="请选择一个或多个用户">
         <el-option
           v-for="item in options"
           :key="item.userId"
@@ -13,9 +14,7 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <p>时间范围</p>
-      <p>起始时间 {{ `${StartTime.getFullYear()}年${month =(StartTime.getMonth() + 1).toString()}月${(StartTime.getDate()).toString()}日` }}</p>
-      <p>结束时间 {{ `${EndTime.getFullYear()}年${month =(EndTime.getMonth() + 1).toString()}月${(EndTime.getDate()).toString()}日` }}</p>
+      <p>第二步：请选择时间范围</p>
       <el-date-picker
         v-model="selectedStart"
         type="datetime"
@@ -26,7 +25,14 @@
         type="datetime"
         placeholder="选择结束时间">
       </el-date-picker>
-      <el-button round v-on:click="getUserInfor">显示所选轨迹</el-button>
+      <el-slider
+      v-model="timeRange"
+      range
+      :format-tooltip="timestampToTime"
+      :min="StartTime.getTime()"
+      :max="EndTime.getTime()">
+      </el-slider>
+      <el-button round v-on:click="getUserInfor" style="margin-top: 10px">显示所选轨迹</el-button>
     </div>
     <div class="main">
       <baidu-map class="map" :center="{lng: 116.404, lat: 39.915}" :zoom="10">
@@ -66,21 +72,22 @@ export default {
       selectedUserId: [],
       StartTime: new Date("2000-01-01 00:00:00"),
       EndTime: new Date("2019-09-24 00:00:00"),
-      selectedStart: null,
-      selectedEnd: null,
-      userList: allData,
+      selectedStart: new Date("2000-01-01 00:00:00"),
+      selectedEnd: new Date("2019-09-24 00:00:00"),
+      timeRange: [new Date("2000-01-01 00:00:00").getTime(), new Date("2019-09-24 00:00:00").getTime()],
+      userList: [],
       polylinePath: [],
       options: [
         {
-          userId: '00001',
+          userId: 'user0000',
           value: 0
         },
         {
-          userId: '00002',
+          userId: 'user0001',
           value: 1
         },
         {
-          userId: '00003',
+          userId: 'user0002',
           value: 2
         }
       ]
@@ -88,34 +95,51 @@ export default {
   },
   watch: {
     selectedUserId: function () {
+      var timeList = []
       for(var i = 0; i < this.selectedUserId.length; i++){
         var times = allData[this.selectedUserId[i]][1].length
         var min = allData[this.selectedUserId[i]][1][0].time
-        var max = allData[this.selectedUserId[i]][1][times - 1].time    
-        if(new Date(min) > this.StartTime){
-          this.StartTime = new Date(min)
-        }
-        if(new Date(max) < this.EndTime){
-          this.EndTime = new Date(max)
-        }
+        var max = allData[this.selectedUserId[i]][1][times - 1].time
+        timeList.push(min)
+        timeList.push(max)
       }
-    },
-    value: function () {
       /* eslint-disable */
-      console.log(this.value)
+      var maxN = timeList[0];
+      var minN = timeList[0];
+      for(var i=1;i<timeList.length;i++){
+        var cur = timeList[i];
+        cur>maxN ? maxN=cur : null;
+        cur<minN ? minN=cur : null;
+      }
+      this.StartTime = new Date(minN)
+      this.EndTime = new Date(maxN)
     }
   },
   methods: {
     getUserInfor: function () {
       var strIds = this.selectedUserId.toString()
+      this.selectedStart = this.timestampToTime(this.timeRange[0])
+      this.selectedEnd = this.timestampToTime(this.timeRange[1])
+      /* eslint-disable */
+      console.log('start', this.selectedStart, this.selectedEnd)
       userApi.getUserInfor(strIds, this.selectedStart, this.selectedEnd)
         .then(response => {
-          /* eslint-disable */
-          console.log(response.data)
+          this.userList = response.data.data
+          console.log('userList', this.userList)
         })
         .catch(error => {
           console.error(error.message)
         })
+    },
+    timestampToTime: function(timestamp) {
+      var date = new Date(timestamp)
+      var Y = date.getFullYear() + '-'
+      var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-'
+      var D = date.getDate() + ' '
+      var h = date.getHours() + ':'
+      var m = date.getMinutes() + ':'
+      var s = date.getSeconds()
+      return Y+M+D+h+m+s
     }
   }
 }
@@ -148,6 +172,11 @@ body {
   width: 20vw;
   height: 90.5vh;
   float: left;
+  text-align: center
+}
+.title {
+  line-height: 3rem;
+  border-bottom: 1px solid #a0a0a0;
 }
 .main {
   width: 80vw;
