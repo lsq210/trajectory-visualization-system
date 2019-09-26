@@ -52,7 +52,7 @@
       <el-button round v-on:click="getUserInfor" style="margin-top: 10px">显示所选轨迹</el-button>
     </div>
     <div class="main">
-      <baidu-map class="map" :center="{lng: 116.3, lat: 40}" :zoom="10">
+      <baidu-map class="map" :center="{lng: 114.3727382229, lat: 30.5411841586}" :zoom="10" :scroll-wheel-zoom="true">
         <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
         <div v-for="(user, userIndex) in userList"
         :key="`user-${userIndex}`">
@@ -79,7 +79,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import userApi from '@/api/user.api.js'
 import allData from './data.json'
